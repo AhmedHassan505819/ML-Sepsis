@@ -1,0 +1,203 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{parskip}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    urlcolor=blue
+}
+
+\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{1em}{}
+\titlespacing{\section}{0pt}{12pt}{6pt}
+\titlespacing{\subsection}{0pt}{10pt}{4pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\title{\vspace{-1.5cm}\textbf{Early Sepsis Prediction from ICU Time Series:\\
+Does Modelling Missingness Patterns Improve Prediction?}\\[4pt]
+\large Project Synopsis}
+
+% ============================================================
+% EDIT THIS BLOCK: replace with your group's actual names/CMS IDs.
+% Keep whichever line applies and delete the other two placeholder
+% options, or leave all three if your template requires a fixed
+% three-member format.
+% ============================================================
+\author{
+\begin{tabular}{lll}
+\textbf{Name} & \textbf{CMS ID} & \textbf{Role} \\
+\hline
+Student Name 1 & 000000 & \\
+Student Name 2 & 000000 & \\
+Student Name 3 & 000000 & \\
+\end{tabular}
+}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\vspace{-0.5cm}
+
+\noindent\textbf{Course:} Machine Learning \hfill \textbf{Submission Date:} September 25, 2026
+
+\vspace{0.3cm}
+\hrule
+\vspace{0.4cm}
+
+% ============================================================
+\section{Motivation and Problem Statement}
+
+Sepsis is a leading cause of intensive care unit (ICU) mortality, and delays in
+treatment are strongly associated with worse patient outcomes. Early sepsis,
+however, presents with subtle, easily overlooked physiological changes that
+closely resemble normal clinical variation, making early detection difficult
+even for experienced clinicians. Automated early-warning systems built on ICU
+time-series data offer a way to flag at-risk patients hours before clinical
+recognition, potentially enabling earlier intervention.
+
+A central challenge in this setting is that ICU data exhibits severe and
+\emph{non-random} missingness: laboratory tests are ordered selectively based
+on clinical suspicion rather than at fixed intervals, so the presence or
+absence of a measurement is itself informative. Most existing approaches treat
+missing data purely as an obstacle to be imputed away, discarding this
+signal. This project investigates whether explicitly modelling missingness
+patterns, rather than merely filling them in, improves early sepsis
+prediction.
+
+% ============================================================
+\section{Related Work and Positioning}
+
+Lipton et al.~\cite{lipton2016} demonstrated that treating missingness
+indicators as explicit features, rather than relying on imputation alone,
+improves predictive performance in clinical time-series classification. Che
+et al.~\cite{che2018} extended this idea with the GRU-D architecture, formally
+identifying \emph{informative missingness} as an underexploited signal in
+multivariate clinical time series. Both works, however, rely on deep
+recurrent architectures whose internal handling of missingness is difficult
+to interpret in isolation.
+
+Within the PhysioNet/CinC 2019 Sepsis Challenge specifically, the majority of
+published approaches use gradient-boosted tree ensembles (e.g., XGBoost) with
+imputation strategies such as mean-filling, linear interpolation, or
+MissForest~\cite{cinc2019survey}. Where missingness indicators are used, they
+are typically bundled together with many other engineered features without
+isolating their individual contribution to performance.
+
+This project differs by running a \textbf{controlled comparison} on the same
+classifiers across three explicit data representations: (A) standard
+imputation only, (B) imputation plus binary missingness masks, and (C)
+imputation plus time-since-last-measurement features. Holding the model
+architecture fixed while varying only the missingness representation isolates
+the specific contribution of missingness modelling to prediction quality, a
+comparison that is largely absent from prior work on this dataset.
+
+% ============================================================
+\section{Dataset}
+
+We use the PhysioNet/Computing in Cardiology Challenge 2019
+dataset~\cite{reyna2019}, comprising hourly ICU records for 40{,}336 patients
+across two hospital systems (Hospital A: 20{,}336 patients; Hospital B:
+20{,}000 patients), totaling 1{,}552{,}210 patient-hours. Each hourly record
+contains 8 vital signs, 26 laboratory values, and 6 demographic variables,
+with a binary \texttt{SepsisLabel} marking sepsis onset per Sepsis-3 criteria,
+shifted six hours earlier than clinical recognition to reward early
+prediction.
+
+Exploratory analysis of the full dataset confirms the challenges motivating
+this project. Class imbalance is severe at the row level: 7.27\% of patients
+ever develop sepsis, but only 1.80\% of individual hourly rows are labeled
+positive. Missingness is pronounced and highly uneven across features, as
+summarized in Table~\ref{tab:missingness}.
+
+\begin{table}[h]
+\centering
+\caption{Missingness in the five worst-affected laboratory features.}
+\label{tab:missingness}
+\begin{tabular}{lc}
+\toprule
+\textbf{Feature} & \textbf{\% Missing} \\
+\midrule
+Bilirubin\_direct & 99.81 \\
+Fibrinogen        & 99.34 \\
+TroponinI         & 99.05 \\
+Bilirubin\_total   & 98.51 \\
+Alkalinephos      & 98.39 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This level of missingness is consistent with selective, clinically-driven
+test ordering rather than random sensor dropout, making the dataset directly
+suited to studying informative missingness. Its open access, established
+provenance, and manageable scale make it feasible to work with within the
+course timeframe.
+
+% ============================================================
+\section{Performance Metrics}
+
+Given the severe row-level class imbalance (98.2\% negative), standard
+accuracy is uninformative: a trivial classifier that always predicts
+``no sepsis'' would score 98.2\%. We therefore report:
+
+\begin{itemize}[itemsep=2pt]
+    \item \textbf{PR-AUC} (precision--recall area under curve), which is more
+    sensitive to minority-class performance than ROC-AUC under severe
+    imbalance;
+    \item \textbf{F1-score} at a selected operating threshold, balancing
+    precision and recall;
+    \item The Challenge's own \textbf{time-dependent utility score}, which
+    rewards predictions made between 12 hours before and 3 hours after true
+    sepsis onset, and penalizes both late detection and false alarms.
+\end{itemize}
+
+The utility score is essential to this project because it captures the
+\emph{clinical} cost structure of an early-warning system in a way that
+PR-AUC and F1 do not: a model can achieve strong discriminative performance
+while still alerting too late to be clinically useful. Comparing
+representations A, B, and C across all three metrics will indicate whether
+missingness-aware modelling improves not only raw discrimination, but the
+clinically-relevant early-detection property the utility score is designed to
+capture.
+
+% ============================================================
+\begin{thebibliography}{9}
+
+\bibitem{lipton2016}
+Z.~C. Lipton, D.~C. Kale, and R.~Wetzel, ``Modeling Missing Data in Clinical
+Time Series with RNNs,'' \emph{arXiv preprint arXiv:1606.04130}, 2016.
+
+\bibitem{che2018}
+Z.~Che, S.~Purushotham, K.~Cho, D.~Sontag, and Y.~Liu, ``Recurrent Neural
+Networks for Multivariate Time Series with Missing Values,'' \emph{Scientific
+Reports}, vol.~8, no.~6085, 2018.
+
+\bibitem{reyna2019}
+M.~A. Reyna, C.~S. Josef, R.~Jeter, S.~P. Shashikumar, M.~B. Westover,
+S.~Nemati, A.~Sharma, and G.~D. Clifford, ``Early Prediction of Sepsis From
+Clinical Data: The PhysioNet/Computing in Cardiology Challenge,''
+\emph{Critical Care Medicine}, vol.~48, no.~2, pp.~210--217, 2019.
+
+\bibitem{cinc2019survey}
+Survey of PhysioNet/CinC 2019 Challenge entries (e.g., XGBoost-based
+pipelines using mean imputation, linear interpolation, and MissForest for
+missing-value handling), as reported in Challenge proceedings papers,
+Computing in Cardiology, 2019.
+
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,25 @@
+# Data (too large for git, regenerate via scripts/ instead)
+data/*.csv
+data/*.psv
+data/training_setA/
+data/training_setB/
+*.csv
+!results/*.csv
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+venv/
+.venv/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+
+# OS junk
+.DS_Store
+Thumbs.db
