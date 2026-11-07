@@ -19,3 +19,16 @@ results section — don't let it go stale.
 - **Utility Score**: from PhysioNet's official `evaluate_sepsis_score.py`, not a custom implementation
 - **Notes**: anything that affects interpretation — e.g. "threshold=0.5, not tuned yet", "ran on val set only"
 - Always report **val set** results here until the final paper, where test set results appear once, at the end
+
+ | A | Logistic Regression | 0.0686 | 0.0775 | | val set, thr=0.5, balanced weights, single run | 
+ | A | HistGradientBoosting | 0.0886 | 0.1120 | | val set, thr=0.5, balanced weights, default params, seed 42 |
+
+ ## Split (notebook 02, seed 42, stratified by ever-septic)
+| Split | Patients | Rows | Ever-septic patients |
+|---|---|---|---|
+| train | 28,235 | 1,086,436 | 7.27% |
+| val   | 6,050  | 231,472   | 7.27% |
+| test  | 6,051  | 234,302   | 7.27% |
+
+Random-guess PR-AUC on val = 0.018 (4,162 positive rows / 231,472).
+Test split is untouched until the final paper.
