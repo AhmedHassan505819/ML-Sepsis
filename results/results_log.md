@@ -38,3 +38,11 @@ Test split is untouched until the final paper.
 | B | HistGradientBoosting | 0.0900 | 0.1150 |  | val set, thr=0.5, mean of 3 run(s) | |
 | A | LogisticRegression | 0.0686 | 0.0775 |  | val set, thr=0.5, mean of 1 run(s) | |
 | B | LogisticRegression | 0.0750 | 0.0862 |  | val set, thr=0.5, mean of 1 run(s) | |
+
+
+| A | HistGradientBoosting | 0.0869 | 0.1124 |  | val set, thr=0.5, mean of 3 run(s) | |
+| B | HistGradientBoosting | 0.0900 | 0.1150 |  | val set, thr=0.5, mean of 3 run(s) | |
+| C | HistGradientBoosting | 0.0933 | 0.1180 |  | val set, thr=0.5, mean of 3 run(s) | |
+| A | LogisticRegression | 0.0686 | 0.0775 |  | val set, thr=0.5, mean of 1 run(s) | |
+| B | LogisticRegression | 0.0750 | 0.0862 |  | val set, thr=0.5, mean of 1 run(s) | |
+| C | LogisticRegression | 0.0844 | 0.0969 |  | val set, thr=0.5, mean of 1 run(s) | |
