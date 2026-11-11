@@ -32,3 +32,9 @@ results section — don't let it go stale.
 
 Random-guess PR-AUC on val = 0.018 (4,162 positive rows / 231,472).
 Test split is untouched until the final paper.
+
+
+| A | HistGradientBoosting | 0.0869 | 0.1124 |  | val set, thr=0.5, mean of 3 run(s) | |
+| B | HistGradientBoosting | 0.0900 | 0.1150 |  | val set, thr=0.5, mean of 3 run(s) | |
+| A | LogisticRegression | 0.0686 | 0.0775 |  | val set, thr=0.5, mean of 1 run(s) | |
+| B | LogisticRegression | 0.0750 | 0.0862 |  | val set, thr=0.5, mean of 1 run(s) | |
